@@ -1,10 +1,11 @@
 package com.example.myapplication
 
 import android.app.Fragment
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 
 private fun String.logI(dialogChain: DialogChain) {
-
+    Log.e("-->>", this)
 }
 
 class DialogChain private constructor(
@@ -12,7 +13,10 @@ class DialogChain private constructor(
     val activity: FragmentActivity? = null,
     val fragment: Fragment? = null,
     private var interceptors: MutableList<DialogInterceptor>?
-) {
+) : DialogEventListener {
+
+    var dialogEventListener: DialogEventListener? = null
+
     companion object {
         @JvmStatic
         fun create(initialCapacity: Int = 0): Builder {
@@ -58,6 +62,7 @@ class DialogChain private constructor(
         }
         private var activity: FragmentActivity? = null
         private var fragment: Fragment? = null
+        private var dialogEventListener: DialogEventListener? = null
 
         // 添加一个拦截器。
         fun addInterceptor(interceptor: DialogInterceptor): Builder {
@@ -80,8 +85,29 @@ class DialogChain private constructor(
         }
 
         fun build(): DialogChain {
-            return DialogChain(activity, fragment, interceptors)
+            var dialogChain = DialogChain(activity, fragment, interceptors)
+            dialogChain.dialogEventListener = dialogEventListener
+            return dialogChain
+        }
+
+        // 添加一个回调
+        fun addDialogEventListener(dialogEventListener: DialogEventListener): Builder {
+            this.dialogEventListener = dialogEventListener
+            return this
         }
     }
+
+    override fun onShowEvent() {
+        dialogEventListener?.onShowEvent()
+    }
+
+    override fun onDismissEvent() {
+        dialogEventListener?.onDismissEvent()
+    }
+}
+
+open interface DialogEventListener {
+    fun onShowEvent()
+    fun onDismissEvent();
 }
 

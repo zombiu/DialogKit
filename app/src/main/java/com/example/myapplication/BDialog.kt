@@ -22,6 +22,7 @@ class BDialog(context: Context) : BaseDialog(context), View.OnClickListener {
         setOnDismissListener {
             chain()?.process()
         }
+        setCancelable(false)
     }
 
     override fun onClick(p0: View?) {
