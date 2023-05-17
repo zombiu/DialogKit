@@ -33,11 +33,17 @@ class MainActivity : AppCompatActivity() {
         }, 5000)
         activityMainBinding.tvShow.setOnClickListener {
             Toast.makeText(this, "嘿，地道", Toast.LENGTH_LONG)
+            Log.e("-->>", "嘿，地道")
+        }
+        activityMainBinding.content.setOnClickListener {
+            Toast.makeText(this, "root 嘿，地道", Toast.LENGTH_LONG)
+            Log.e("-->>", "root 嘿，地道")
         }
     }
 
     //创建 DialogChain
     private fun createDialogChain() {
+        var count = 0
         dialogChain = DialogChain.create(3)
             .attach(this)
             .addInterceptor(ADialog(this))
@@ -50,6 +56,11 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onDismissEvent() {
                     Log.e("-->>", "onDismissEvent")
+                    count++
+                    if (count == 3) {
+                        Log.e("-->>", "onDismissEvent 恢复点击")
+                        activityMainBinding.vCover.isClickable = false
+                    }
                 }
 
             })
@@ -61,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         // 开始从链头弹窗。
         dialogChain.process()
-        activityMainBinding.root.isEnabled = false
+        activityMainBinding.vCover.isClickable = true
     }
 }
 
