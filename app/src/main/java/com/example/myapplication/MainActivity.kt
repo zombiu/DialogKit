@@ -1,10 +1,14 @@
 package com.example.myapplication
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Gravity
+import android.view.Window
 import android.widget.Toast
 import com.example.myapplication.databinding.ActivityMainBinding
 
@@ -22,11 +26,16 @@ class MainActivity : AppCompatActivity() {
     private val bDialog by lazy { BDialog(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
         DialogChain.openLog(true)
-        createDialogChain() //创建 DialogChain
+        activityMainBinding.tvAnchor.post {
+            createDialogChain() //创建 DialogChain
+            // 开始从链头弹窗。
+            dialogChain.process()
+        }
         // 模拟延迟数据回调。
         Handler(Looper.getMainLooper()).postDelayed({
             bDialog.onDataCallback("延迟数据回来了！！")
@@ -43,15 +52,37 @@ class MainActivity : AppCompatActivity() {
 
     //创建 DialogChain
     private fun createDialogChain() {
+        var aDialog = ADialog(this)
+        //去掉pading方法1、设置背景 todo 不设置背景  会有一个自带的padding
+        aDialog?.window?.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+        //4、去掉默认padding间距 这个去除padding的 无效果
+//        aDialog?.window?.getDecorView()?.setPadding(0, 0, 0, 0)
+        // 设置定位原点
+//        aDialog.window?.setGravity(Gravity.TOP or Gravity.START)
+        /*var location = intArrayOf(0, 0)
+        activityMainBinding.tvAnchor.getLocationOnScreen(location)
+        var x = location[0] // view距离window 左边的距离（即x轴方向）
+        var y = location[1] // view距离window 顶边的距离（即y轴方向）
+        Log.e("-->>", "锚点view x=${x} y=${y}")
+        var offsetX = x + activityMainBinding.tvAnchor.width
+        var offsetY = y + activityMainBinding.tvAnchor.height / 2 - (aDialog.window?.attributes?.height ?: 0)
+        aDialog.setLocation(offsetX, offsetY)*/
+
         var count = 0
+        var first = true
         dialogChain = DialogChain.create(3)
             .attach(this)
-            .addInterceptor(ADialog(this))
+            .addInterceptor(aDialog)
             .addInterceptor(bDialog)
             .addInterceptor(CDialog(this))
             .addDialogEventListener(object : DialogEventListener {
                 override fun onShowEvent() {
                     Log.e("-->>", "onShowEvent")
+                    if (first) {
+                        first = false
+                        // 醒目：show之后要设置原点 负责定位会出错
+                        aDialog.window?.setGravity(Gravity.TOP or Gravity.START)
+                    }
                 }
 
                 override fun onDismissEvent() {
@@ -70,8 +101,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        // 开始从链头弹窗。
-        dialogChain.process()
         activityMainBinding.vCover.isClickable = true
     }
 }
