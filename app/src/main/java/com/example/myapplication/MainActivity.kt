@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.Window
 import android.widget.Toast
+import com.blankj.utilcode.util.BarUtils
 import com.example.myapplication.databinding.ActivityMainBinding
 
 /**
@@ -54,19 +55,20 @@ class MainActivity : AppCompatActivity() {
     private fun createDialogChain() {
         var aDialog = ADialog(this)
         //去掉pading方法1、设置背景 todo 不设置背景  会有一个自带的padding
-        aDialog?.window?.setBackgroundDrawable(ColorDrawable(Color.WHITE))
+        aDialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         //4、去掉默认padding间距 这个去除padding的 无效果
 //        aDialog?.window?.getDecorView()?.setPadding(0, 0, 0, 0)
         // 设置定位原点
 //        aDialog.window?.setGravity(Gravity.TOP or Gravity.START)
-        /*var location = intArrayOf(0, 0)
+        var location = intArrayOf(0, 0)
         activityMainBinding.tvAnchor.getLocationOnScreen(location)
         var x = location[0] // view距离window 左边的距离（即x轴方向）
         var y = location[1] // view距离window 顶边的距离（即y轴方向）
         Log.e("-->>", "锚点view x=${x} y=${y}")
         var offsetX = x + activityMainBinding.tvAnchor.width
-        var offsetY = y + activityMainBinding.tvAnchor.height / 2 - (aDialog.window?.attributes?.height ?: 0)
-        aDialog.setLocation(offsetX, offsetY)*/
+        var offsetY = y + (aDialog.window!!.attributes.height - activityMainBinding.tvAnchor.height) / 2
+        // y轴有个状态栏的高度 需要处理
+        aDialog.setLocation(offsetX, offsetY - BarUtils.getStatusBarHeight())
 
         var count = 0
         var first = true
@@ -80,7 +82,7 @@ class MainActivity : AppCompatActivity() {
                     Log.e("-->>", "onShowEvent")
                     if (first) {
                         first = false
-                        // 醒目：show之后要设置原点 负责定位会出错
+                        // 醒目：show之后要设置原点 否则定位会出错
                         aDialog.window?.setGravity(Gravity.TOP or Gravity.START)
                     }
                 }
