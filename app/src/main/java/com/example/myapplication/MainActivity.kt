@@ -11,6 +11,8 @@ import android.view.Gravity
 import android.view.Window
 import android.widget.Toast
 import com.blankj.utilcode.util.BarUtils
+import com.blankj.utilcode.util.LogUtils
+import com.example.myapplication.algorithm.Sort_Test
 import com.example.myapplication.databinding.ActivityMainBinding
 
 /**
@@ -98,6 +100,10 @@ class MainActivity : AppCompatActivity() {
 
             })
             .build()
+
+
+        var sortTest = Sort_Test()
+        LogUtils.e("-->>", "返回的索引=${sortTest.findFirst(5)}")
 
     }
 
